@@ -27,8 +27,9 @@ func main() {
 	timeoutCtx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
-	acAddr := "localhost:8081"
-	cc, err := grpc.DialContext(timeoutCtx, "localhost:8081",
+	acAddr := "localhost:30031"
+	cc, err := grpc.DialContext(timeoutCtx, acAddr,
+		grpc.WithBlock(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	if err != nil {

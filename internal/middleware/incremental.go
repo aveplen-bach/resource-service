@@ -39,16 +39,16 @@ func IncrementalToken(ts *service.TokenService) gin.HandlerFunc {
 			nextch <- next
 		}()
 
-		c.Next()
-
 		select {
 		case err := <-errch:
-			c.JSON(http.StatusNotFound, gin.H{
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 				"err": err.Error(),
 			})
 			return
 		case next := <-nextch:
 			c.Header("Authorizatoin", fmt.Sprintf("Bearer %s", next))
 		}
+
+		c.Next()
 	}
 }

@@ -32,8 +32,11 @@ func IncrementalToken(ts *service.TokenService) gin.HandlerFunc {
 
 		go func() {
 			next, err := ts.NextToken(token)
+			if err != nil {
+				errch <- err
+				return
+			}
 			nextch <- next
-			errch <- err
 		}()
 
 		c.Next()

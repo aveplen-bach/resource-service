@@ -14,15 +14,15 @@ type (
 	}
 
 	ServerConfig struct {
-		Addr string `yaml:"addr" env-defaul:":8082"`
+		Addr string `yaml:"addr" env:"GRPC_LISTEN_ADDR" env-defaul:":8082"`
 	}
 
 	SJWTConfig struct {
-		Secret string `yaml:"secret" env-default:"mysecret"`
+		Secret string `yaml:"secret" env:"SJWT_SECRET" env-default:"mysecret"`
 	}
 
 	AuthClientConfig struct {
-		Addr string `yaml:"addr" env-default:"localhost:30031"`
+		Addr string `yaml:"addr" env:"AUTH_CLIENT_ADDR" env-default:"localhost:30031"`
 	}
 )
 

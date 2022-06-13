@@ -41,7 +41,7 @@ func Start(cfg config.Config) {
 
 	// ================================ service ===============================
 	logrus.Info("creating token service")
-	ts := service.NewTokenService(ac)
+	ts := service.NewTokenService(cfg, ac)
 
 	// ================================ router ================================
 	logrus.Info("creating router")

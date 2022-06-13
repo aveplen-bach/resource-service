@@ -47,11 +47,12 @@ func Start(cfg config.Config) {
 	logrus.Info("creating router")
 	r := gin.Default()
 	r.Use(middleware.Cors())
-	r.Use(middleware.IncrementalToken(ts))
+	r.Use(middleware.Incremental(ts))
+	r.Use(middleware.Admin())
 
 	// ================================ routes ================================
 	logrus.Info("registering endpoints")
-	r.GET("/api/resource", func(c *gin.Context) {
+	r.GET("/api/prot/resource", func(c *gin.Context) {
 		logrus.Info("returning 200")
 		c.JSON(http.StatusOK, gin.H{
 			"authenticated": "true",

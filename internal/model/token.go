@@ -1,18 +1,18 @@
 package model
 
 type TokenProtected struct {
-	SynchronizationBytes []byte
-	Header               Header
-	Payload              Payload
-	SignatureBytes       []byte
+	SynBytes  []byte
+	Header    Header
+	Payload   Payload
+	SignBytes []byte
 }
 
 type Header struct {
-	SignatureAlg  string `json:"alg"`
-	EncryptionAlg string `json:"enc"`
+	SignAlg string `json:"alg"`
+	EncrAlg string `json:"enc"`
 }
 
 type Payload struct {
-	UserID    int `json:"userId"`
-	SessionID int `json:"sessionId"`
+	UserID int  `json:"userId"`
+	Admin  bool `json:"admin"`
 }

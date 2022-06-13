@@ -35,7 +35,7 @@ func (t *TokenService) NextToken(token string) (string, error) {
 	}
 
 	signval, err := valSign(
-		protected.SignatureBytes,
+		protected.SignBytes,
 		[]byte(t.cfg.SJWTConfig.Secret),
 		protected.Header,
 		protected.Payload,
@@ -49,13 +49,13 @@ func (t *TokenService) NextToken(token string) (string, error) {
 		return "", fmt.Errorf("sign of prev token is not correct")
 	}
 
-	nsyn, err := t.ac.GetNextSynPackage(uint64(protected.Payload.UserID), protected.SynchronizationBytes)
+	nsyn, err := t.ac.GetNextSynPackage(uint64(protected.Payload.UserID), protected.SynBytes)
 	if err != nil {
 		logrus.Error("could not get next syn")
 		return "", fmt.Errorf("could not get next syn: %w", err)
 	}
 
-	protected.SynchronizationBytes = nsyn
+	protected.SynBytes = nsyn
 
 	repacked, err := pack(protected)
 	if err != nil {
@@ -64,19 +64,6 @@ func (t *TokenService) NextToken(token string) (string, error) {
 	}
 
 	return repacked, nil
-}
-
-func (t *TokenService) ValidateToken(token string) (bool, error) {
-	logrus.Info("validatin token")
-	protected, err := unpack(token)
-	if err != nil {
-		logrus.Error("could not unpack token")
-		return false, fmt.Errorf("could not unpack token: %w", err)
-	}
-
-	logrus.Warn("Validate token not implemented", protected)
-
-	return true, nil
 }
 
 func (t *TokenService) ExtractPayload(token string) (model.Payload, error) {
@@ -92,7 +79,7 @@ func (t *TokenService) ExtractPayload(token string) (model.Payload, error) {
 
 func pack(protected model.TokenProtected) (string, error) {
 	logrus.Info("packing token")
-	b64Syn := base64.StdEncoding.EncodeToString(protected.SynchronizationBytes)
+	b64Syn := base64.StdEncoding.EncodeToString(protected.SynBytes)
 
 	headBytes, err := json.Marshal(protected.Header)
 	if err != nil {
@@ -108,7 +95,7 @@ func pack(protected model.TokenProtected) (string, error) {
 	}
 	b64Pld := base64.StdEncoding.EncodeToString(pldBytes)
 
-	b64Sig := base64.StdEncoding.EncodeToString(protected.SignatureBytes)
+	b64Sig := base64.StdEncoding.EncodeToString(protected.SignBytes)
 
 	return fmt.Sprintf(
 		"%s.%s.%s.%s",
@@ -163,10 +150,10 @@ func unpack(token string) (model.TokenProtected, error) {
 	}
 
 	return model.TokenProtected{
-		SynchronizationBytes: syn,
-		Header:               head,
-		Payload:              payload,
-		SignatureBytes:       sign,
+		SynBytes:  syn,
+		Header:    head,
+		Payload:   payload,
+		SignBytes: sign,
 	}, nil
 }
 

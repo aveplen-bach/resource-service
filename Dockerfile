@@ -17,5 +17,6 @@ RUN CGO_ENABLED=0 go build -o /bin/resource-service \
 FROM alpine:3.15.4 as runtime
 
 COPY --from=builder /bin/resource-service /bin/resource-service
+COPY ./resource-service.yaml ./resource-service.yaml
 
 ENTRYPOINT [ "/bin/resource-service" ]

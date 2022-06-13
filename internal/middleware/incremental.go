@@ -13,10 +13,8 @@ import (
 )
 
 func IncrementalToken(ts *service.TokenService) gin.HandlerFunc {
-	logrus.Info("incremental token middleware registered")
-
 	return func(c *gin.Context) {
-		logrus.Info("incremental token middleware triggered")
+		logrus.Info("parsing request token")
 
 		token, err := ginutil.ExtractToken(c)
 		if err != nil {
@@ -27,6 +25,7 @@ func IncrementalToken(ts *service.TokenService) gin.HandlerFunc {
 			return
 		}
 
+		logrus.Info("getting next token")
 		next, err := ts.NextToken(token)
 		if err != nil {
 			logrus.Warn(err)
@@ -39,6 +38,7 @@ func IncrementalToken(ts *service.TokenService) gin.HandlerFunc {
 		bw := &bodyWriter{body: new(bytes.Buffer), ResponseWriter: c.Writer}
 		c.Writer = bw
 
+		logrus.Info("incremental: passing to next")
 		c.Next()
 
 		resb, err := ioutil.ReadAll(bw.body)
@@ -46,6 +46,7 @@ func IncrementalToken(ts *service.TokenService) gin.HandlerFunc {
 			logrus.Fatal(err)
 		}
 
+		logrus.Info("injecting next token")
 		var newresb []byte
 		if len(resb) == 0 {
 			newresb, err = json.Marshal(gin.H{
@@ -70,6 +71,7 @@ func IncrementalToken(ts *service.TokenService) gin.HandlerFunc {
 			logrus.Fatal(err)
 		}
 
+		logrus.Info("swapping response writer")
 		c.Writer = bw.ResponseWriter
 		c.Writer.Write(newresb)
 	}

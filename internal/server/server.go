@@ -23,8 +23,8 @@ import (
 
 func Start(cfg config.Config) {
 	// ============================= auth client ==============================
-
-	timeoutCtx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	logrus.Info("connecting to auth service")
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	cc, err := grpc.DialContext(timeoutCtx, cfg.AuthClient.Addr,
@@ -40,25 +40,26 @@ func Start(cfg config.Config) {
 	logrus.Warn("auth server: ", ac)
 
 	// ================================ service ===============================
-
+	logrus.Info("creating token service")
 	ts := service.NewTokenService(ac)
 
 	// ================================ router ================================
-
+	logrus.Info("creating router")
 	r := gin.Default()
 	r.Use(middleware.Cors())
 	r.Use(middleware.IncrementalToken(ts))
 
 	// ================================ routes ================================
-
+	logrus.Info("registering endpoints")
 	r.GET("/api/resource", func(c *gin.Context) {
+		logrus.Info("returning 200")
 		c.JSON(http.StatusOK, gin.H{
 			"authenticated": "true",
 		})
 	})
 
 	// =============================== shutdown ===============================
-
+	logrus.Info("starting server")
 	srv := &http.Server{
 		Addr:    cfg.ServerConfig.Addr,
 		Handler: r,

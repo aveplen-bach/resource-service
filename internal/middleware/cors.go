@@ -6,10 +6,8 @@ import (
 )
 
 func Cors() gin.HandlerFunc {
-	logrus.Info("cors middleware registered")
-
 	return func(c *gin.Context) {
-		logrus.Info("cors middleware triggered")
+		logrus.Info("responding with cors")
 
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")

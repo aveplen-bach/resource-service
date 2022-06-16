@@ -31,8 +31,11 @@ func (t *TokenService) NextToken(token string) (string, error) {
 	protected, err := unpack(token)
 	if err != nil {
 		logrus.Error("could not unpack token")
+		logrus.Error(err)
 		return "", fmt.Errorf("could not unpack token: %w", err)
 	}
+
+	logrus.Println(protected)
 
 	signval, err := valSign(
 		protected.SignBytes,
@@ -42,16 +45,19 @@ func (t *TokenService) NextToken(token string) (string, error) {
 	)
 	if err != nil {
 		logrus.Error("could not validate signature")
+		logrus.Error(err)
 		return "", fmt.Errorf("could not validate signature: %w", err)
 	}
 	if !signval {
 		logrus.Error("sign of prev token is not correct")
+		logrus.Error(err)
 		return "", fmt.Errorf("sign of prev token is not correct")
 	}
 
 	nsyn, err := t.ac.GetNextSynPackage(uint64(protected.Payload.UserID), protected.SynBytes)
 	if err != nil {
 		logrus.Error("could not get next syn")
+		logrus.Error(err)
 		return "", fmt.Errorf("could not get next syn: %w", err)
 	}
 
@@ -60,6 +66,7 @@ func (t *TokenService) NextToken(token string) (string, error) {
 	repacked, err := pack(protected)
 	if err != nil {
 		logrus.Error("could not pack token")
+		logrus.Error(err)
 		return "", fmt.Errorf("could not pack token: %w", err)
 	}
 
@@ -71,6 +78,7 @@ func (t *TokenService) ExtractPayload(token string) (model.Payload, error) {
 	protected, err := unpack(token)
 	if err != nil {
 		logrus.Error("could not deconstruct token")
+		logrus.Error(err)
 		return model.Payload{}, fmt.Errorf("could not deconstruct token: %w", err)
 	}
 
@@ -84,6 +92,7 @@ func pack(protected model.TokenProtected) (string, error) {
 	headBytes, err := json.Marshal(protected.Header)
 	if err != nil {
 		logrus.Error("could not marshal header part")
+		logrus.Error(err)
 		return "", fmt.Errorf("could not marshal header part: %w", err)
 	}
 	b64Head := base64.StdEncoding.EncodeToString(headBytes)
@@ -91,6 +100,7 @@ func pack(protected model.TokenProtected) (string, error) {
 	pldBytes, err := json.Marshal(protected.Payload)
 	if err != nil {
 		logrus.Error("could not marshal payload part")
+		logrus.Error(err)
 		return "", fmt.Errorf("could not marshal payload part: %w", err)
 	}
 	b64Pld := base64.StdEncoding.EncodeToString(pldBytes)
@@ -117,35 +127,41 @@ func unpack(token string) (model.TokenProtected, error) {
 	syn, err := base64.StdEncoding.DecodeString(tokenParts[0])
 	if err != nil {
 		logrus.Error("could not decode syn")
+		logrus.Error(err)
 		return model.TokenProtected{}, fmt.Errorf("could not decode syn: %w", err)
 	}
 
 	headb, err := base64.StdEncoding.DecodeString(tokenParts[1])
 	if err != nil {
 		logrus.Error("could not decode header")
+		logrus.Error(err)
 		return model.TokenProtected{}, fmt.Errorf("could not decode header: %w", err)
 	}
 
 	var head model.Header
 	if err := json.Unmarshal(headb, &head); err != nil {
 		logrus.Error("could not unmarshal header")
+		logrus.Error(err)
 		return model.TokenProtected{}, fmt.Errorf("could not unmarshal header: %w", err)
 	}
 
 	pldb, err := base64.StdEncoding.DecodeString(tokenParts[2])
 	if err != nil {
 		logrus.Error("could not decode payload")
+		logrus.Error(err)
 		return model.TokenProtected{}, fmt.Errorf("could not decode payload: %w", err)
 	}
 	var payload model.Payload
 	if err := json.Unmarshal(pldb, &payload); err != nil {
 		logrus.Error("could not unmarshal payload")
+		logrus.Error(err)
 		return model.TokenProtected{}, fmt.Errorf("could not unmarshal payload: %w", err)
 	}
 
 	sign, err := base64.StdEncoding.DecodeString(tokenParts[3])
 	if err != nil {
 		logrus.Error("could not decode sign")
+		logrus.Error(err)
 		return model.TokenProtected{}, fmt.Errorf("could not decode sign: %w", err)
 	}
 
@@ -160,18 +176,21 @@ func unpack(token string) (model.TokenProtected, error) {
 func valSign(signature []byte, secret []byte, header model.Header, payload model.Payload) (bool, error) {
 	headb, err := json.Marshal(header)
 	if err != nil {
+		logrus.Error(err)
 		return false, fmt.Errorf("could not marshal header: %w", err)
 	}
 
 	pldb, err := json.Marshal(payload)
 	if err != nil {
+		logrus.Error(err)
 		return false, fmt.Errorf("could not marshal payload: %w", err)
 	}
 
-	h := hmac.New(sha256.New, []byte(secret))
+	h := hmac.New(sha256.New, secret)
 
 	data := strings.Join(b64EncodeSlice([][]byte{headb, pldb}), ".")
 	if _, err := h.Write([]byte(data)); err != nil {
+		logrus.Error(err)
 		return false, fmt.Errorf("could not construct hmac of original values: %w", err)
 	}
 

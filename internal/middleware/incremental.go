@@ -35,6 +35,7 @@ func Incremental(ts *service.TokenService) gin.HandlerFunc {
 			return
 		}
 
+		logrus.Info("swapping body writer")
 		bw := &bodyWriter{body: new(bytes.Buffer), ResponseWriter: c.Writer}
 		c.Writer = bw
 
@@ -74,6 +75,9 @@ func Incremental(ts *service.TokenService) gin.HandlerFunc {
 		logrus.Info("swapping response writer")
 		c.Writer = bw.ResponseWriter
 		c.Writer.Write(newresb)
+
+		logrus.Info("everything is normal")
+		logrus.Println(c.Writer)
 	}
 }
 
@@ -83,6 +87,6 @@ type bodyWriter struct {
 }
 
 func (w bodyWriter) Write(b []byte) (int, error) {
-	logrus.Info("piping body write into ")
+	logrus.Info("piping body write into buffer")
 	return w.body.Write(b)
 }

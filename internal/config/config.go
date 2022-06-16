@@ -30,11 +30,13 @@ type (
 func ReadConfig(filename string, cfg *Config) error {
 	logrus.Infof("reading config from %s", filename)
 	if err := cleanenv.ReadConfig(filename, cfg); err != nil {
+		logrus.Error(err)
 		return fmt.Errorf("could not read config: %w", err)
 	}
 
 	logrus.Info("reading env")
 	if err := cleanenv.ReadEnv(cfg); err != nil {
+		logrus.Error(err)
 		return fmt.Errorf("could not read config: %w", err)
 	}
 	return nil

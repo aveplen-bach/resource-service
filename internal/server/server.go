@@ -32,6 +32,7 @@ func Start(cfg config.Config) {
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	if err != nil {
+		logrus.Error(err)
 		logrus.Warn(fmt.Errorf("failed to connecto to %s: %w", cfg.AuthClient.Addr, err))
 	}
 
@@ -52,8 +53,7 @@ func Start(cfg config.Config) {
 
 	// ================================ routes ================================
 	logrus.Info("registering endpoints")
-	r.GET("/api/prot/resource", func(c *gin.Context) {
-		logrus.Info("returning 200")
+	r.GET("/api/resource/prot/authenticated", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"authenticated": "true",
 		})

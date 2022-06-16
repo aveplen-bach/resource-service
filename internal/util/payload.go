@@ -15,12 +15,14 @@ func ExPld(token string) (model.Payload, error) {
 	pldb, err := base64.StdEncoding.DecodeString(strings.Split(token, ".")[2])
 	if err != nil {
 		logrus.Errorf("could not decode payload: %w", err)
+		logrus.Error(err)
 		return model.Payload{}, fmt.Errorf("could not decode payload: %w", err)
 	}
 
 	var pld model.Payload
 	if err := json.Unmarshal(pldb, &pld); err != nil {
 		logrus.Errorf("could not unmarshal payload: %w", err)
+		logrus.Error(err)
 		return model.Payload{}, fmt.Errorf("could not unmarshal payload: %w", err)
 	}
 

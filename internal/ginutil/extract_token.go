@@ -13,6 +13,7 @@ func ExtractToken(c *gin.Context) (string, error) {
 
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
+		logrus.Error("authorization is empty")
 		return "", fmt.Errorf("authorization header is empty")
 	}
 

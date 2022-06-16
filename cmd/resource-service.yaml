@@ -1,0 +1,8 @@
+server:
+  addr: ":8086"
+
+sjwt:
+  secret: mysecret
+
+auth-client:
+  addr: localhost:30031

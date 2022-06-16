@@ -14,7 +14,7 @@ COPY . ./
 RUN CGO_ENABLED=0 go build -o /bin/resource-service \
     /go/src/github.com/aveplen-bach/resource-service/cmd/main.go
 
-FROM alpine:3.15.4 as runtime
+FROM alpine/curl:latest as runtime
 
 COPY --from=builder /bin/resource-service /bin/resource-service
 COPY ./resource-service.yaml ./resource-service.yaml
